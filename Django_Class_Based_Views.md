@@ -464,6 +464,30 @@ urlpatterns = [
 ]
 ```
 
+## Interview questions
+
+- **What is mixin?**
+
+Mixin is a type of multiple inheritances wherein you can combine behaviors and attributes of more than one parent class. It provides us with an excellent way to reuse code from multiple classes. One drawback of using these mixins is that it becomes difficult to analyze what a class is doing and which methods to override in case of its code being too scattered between multiple classes.
+
+- **What is context in the Django?**
+
+Context is a dictionary mapping template variable name given to Python objects in Django. This is the general name, but you can give any other name of your choice if you want.
+
+- **What is the difference between Function Based Views and Class Based Views?**
+
+Function based views are a little more explicit and easier to understand while class based views require a little more understanding of how to use these classes and built in methods.
+
+- **What are Class Based Views?**
+
+In short, class based views are simply django views written as python classes. At the end of the day all views are just functions but by using classes we are able to extend our code by utilizing the following:
+
+- Inheritance, so we can write reusable code and make our application more DRY. (Don't Repeat Yourself)
+
+- Built in methods and views to eliminate redundancy for common use cases.
+
+- Separate our code by http method types such as GET and POST. 
+
 <br>
 
 **<p align="center">&#9786; Happy Coding! &#9997;</p>**
