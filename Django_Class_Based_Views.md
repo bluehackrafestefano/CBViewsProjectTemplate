@@ -1,4 +1,3 @@
-
 <center><img src="cohort_007.jpg"  alt="Clarusway" width="600"/></center>
 <br>
 
@@ -6,7 +5,6 @@
 <p>Clarusway<img align="right"
   src="https://secure.meetupstatic.com/photos/event/3/1/b/9/600_488352729.jpeg"  width="15px"></p>
 <br>
-
 
 # Class Based Views
 
@@ -23,7 +21,16 @@
 - Introduction to class-based views
 - Spin up the project
 - Secure your project
-
+- TemplateView
+  - Using TemplateView in urls.py
+  - Using TemplateView in views.py
+- Generic display views
+  - ListView
+  - DetailView
+- Generic editing views
+  - CreateView
+  - UpdateView
+  - DeleteView
 
 ## Introduction to class-based views
 
@@ -37,12 +44,11 @@ Class-based views provide an alternative way to implement views as Python object
 
 - Object oriented techniques such as mixins (multiple inheritance) can be used to factor code into reusable components.
 
-
 ## Spin up the project
 
 - Clone the template project to your local:
 ```git
-git clone xxxxxxxxxx
+git clone https://github.com/bluehackrafestefano/CBViewsTemplateProject.git
 ```
 
 - Use the folder created after clone as the procject main directory, cd to this new directory.
@@ -79,10 +85,24 @@ Pillow==9.0.0
 python-decouple==3.5
 sqlparse==0.4.2
 tzdata==2021.5
-
-# If you see lots of things here, that means there is a problem with your virtual env activation. 
-# Activate scripts again
+# If you see lots of things here, that means there is a problem with your virtual env activation; activate scripts again.
 ```
+
+## Secure your project
+
+### .gitignore
+
+- A gitignore file is already added  to the project root directory. It is essential to use it, because you don't want to send your credentials, big folders, local db files etc. to Github.
+
+### python-decouple
+
+- Create .env file on root directory. We will collect our variables in this file.
+```py
+SECRET_KEY=o5o9...
+```
+- Django secret key generator websites can be used to find a secure key.
+
+- From now on you can send you project to the github.
 
 - Migrate:
 ```bash
@@ -98,24 +118,6 @@ python manage.py createsuperuser  # or;
 python3 manage.py createsuperuser
 ```
 
-## Secure your project
-
-### .gitignore
-
-Add standard .gitignore file to the project root directory. 
-
-Do that before adding your files to staging area, else you will need extra work to unstage files to be able to ignore them.
-
-### python-decouple
-
-- Create .env file on root directory. We will collect our variables in this file.
-```py
-SECRET_KEY = o5o9...
-```
-
-- From now on you can send you project to the github, but double check that you added a .gitignore file which has .env on it.
-
-
 - Run the server and see the initial setup:
 ```bash
 py manage.py runserver  # or;
@@ -123,46 +125,23 @@ python manage.py runserver  # or;
 python3 manage.py runserver
 ```
 
-# INCLASS STARTS
-
-## gitignore
-
-add a gitignore file at same level as env folder, and check that it includes .env and /env lines
-
-## Python Decouple
-
-create a new file and name as .env at same level as env folder
-
-copy your SECRET_KEY from settings.py into this .env file. Don't forget to remove quotation marks from SECRET_KEY
-
-```
-SECRET_KEY = django-insecure-)=b-%-w+0_^slb(exmy*mfiaj&wz6_fb4m&s=az-zs!#1^ui7j
-```
-
-go to settings.py, make amendments below
-
-```python
-from decouple import config
-
-SECRET_KEY = config('SECRET_KEY')
-```
-
-## Class Based Views
-
-Navigate to https://docs.djangoproject.com/en/3.2/topics/class-based-views/
-Explain Documentation
-
 ## TemplateView
 
-### Using TemplateView directly in urls.py
+- Renders a given template, with the context containing parameters captured in the URL.
 
-go to fscohort/urls.py and amend lines
+- Look at the documentation:
+[TemplateView Documentation](https://docs.djangoproject.com/en/4.0/ref/class-based-views/base/#templateview)
+
+### Using TemplateView in urls.py
+
+- Go to fscohort/urls.py and amend lines:
 
 ```python
 from django.urls import path
-from .views import home,student_list, student_add, student_detail, student_update,student_delete
+from .views import home,student_list, student_add, student_detail, student_update, student_delete
 
-from django.views.generic import TemplateView # new line
+# Adding this line to use TemplateView:
+from django.views.generic.base import TemplateView
 
 urlpatterns = [
     # path('', home, name="home"), # comment out this line
@@ -176,24 +155,38 @@ urlpatterns = [
     path('delete/<int:id>/', student_delete, name="delete"),
 ]
 ```
+- Now run the server and see home page still being rendered.
 
 ### Using TemplateView in views.py
 
-go to fscohort/views.py and add below lines
-
+- Go to fscohort/views.py and add below lines:
 ```python
-from django.views.generic import TemplateView
+from django.views.generic.base import TemplateView
 
 class HomeView(TemplateView):
     template_name = "fscohort/home.html"
+
+    # Override get_context_data() function to add a context:
+    # def get_context_data(self, **kwargs):
+    #     context = super().get_context_data(**kwargs)
+    #     context['number'] = random.randrange(1, 100)
+    #     return context
+    # Another example:
+    # def get_context_data(self, **kwargs):
+    #     context = super().get_context_data(**kwargs)
+    #     context['latest_articles'] = Article.objects.all()[:5]
+    #     return context
 ```
 
-go to fscohort/urls.py and amend lines
+- Go to fscohort/urls.py and amend lines
 
-```python
+```py
 from django.urls import path
 from .views import home,student_list, student_add, student_detail, student_update,student_delete
+
 # from django.views.generic import TemplateView # commented
+
+# Import new class base view:
 from .views import HomeView # new line
 
 urlpatterns = [
@@ -208,26 +201,39 @@ urlpatterns = [
 ]
 ```
 
-## ListView
+## Generic display views
 
-navigate to https://docs.djangoproject.com/en/3.2/ref/class-based-views/generic-display/#listview
+- ListView and DetailView are two generic class-based views which designed to display data. On many projects they are typically the most commonly used views.
 
-go to fscohort/views.py and add below lines
+### ListView
 
-```python
-from django.views.generic import ListView
+- A page representing a list of objects.
+
+- While this view is executing, self.object_list will contain the list of objects (usually, but not necessarily a queryset) that the view is operating upon.
+
+[ListView Documentation](https://docs.djangoproject.com/en/4.0/ref/class-based-views/generic-display/#listview)
+
+- Go to fscohort/views.py and add below lines:
+```py
+from django.views.generic.list import ListView
+
 class StudentListView(ListView):
     model = Student
-    # default template name : # app/modelname_list.html
+
+    # default template name : # fscohort/student_list.html
     # this fits our template name no need to use this time
     # template_name = "fscohort/student_list.html"
-    context_object_name = 'students' # default context name : object_list
+
+    context_object_name = 'students'
+    # default context name : student_list
+    # you can change from template. If you don't want to change, use this field
+
+    # Optionally, pagination is possible, especially for long lists
     paginate_by = 10
 ```
 
-go to fscohort/urls.py and amend lines
-
-```python
+- Go to fscohort/urls.py and amend lines:
+```py
 from django.urls import path
 from .views import home,student_list, student_add, student_detail, student_update,student_delete
 # from django.views.generic import TemplateView
@@ -246,20 +252,27 @@ urlpatterns = [
 ]
 ```
 
-## DetailView
+### DetailView
 
-go to fscohort/views.py and add below lines
+- While this view is executing, self.object will contain the object that the view is operating upon.
 
-```python
-from django.views.generic import DetailView
+- [DetailView Documentation](https://docs.djangoproject.com/en/4.0/ref/class-based-views/generic-display/#detailview)
+
+- Go to fscohort/views.py and add below lines
+
+```py
+from django.views.generic.detail import DetailView
+
 class StudentDetailView(DetailView):
     model = Student
+
     pk_url_kwarg = 'id'
+    # pk_url_kwarg: The name of the URLConf keyword argument that contains the primary key. By default, pk_url_kwarg is 'pk'.
 ```
 
-go to fscohort/urls.py and amend lines
+- Go to fscohort/urls.py and amend lines
 
-```python
+```py
 from django.urls import path
 from .views import home,student_list, student_add, student_detail, student_update,student_delete
 # from django.views.generic import TemplateView
@@ -273,28 +286,49 @@ urlpatterns = [
     path('student_list/', StudentListView.as_view(), name="list"),
     path('student_add/', student_add, name="add"),
     # path('detail/<int:id>/', student_detail, name="detail"), # commented
+    # id must be pk or slug, so need to add a field to the view. Or we can simply change id to pk.
     path('detail/<int:id>/', StudentDetailView.as_view(), name="detail"), # new line
     path('update/<int:id>/', student_update, name="update"),
     path('delete/<int:id>/', student_delete, name="delete"),
 ]
 ```
 
-## CreateView
+## Generic editing views
 
-go to fscohort/views.py and add below lines
+- There are generic views for Create, Update, Delete, and Form. The following views provide a foundation for editing content.
 
-```python
-from django.views.generic import CreateView
+### CreateView
+
+- A view that displays a form for creating an object, redisplaying the form with validation errors (if there are any) and saving the object.
+
+- [CreateView Documentation](https://docs.djangoproject.com/en/4.0/ref/class-based-views/generic-editing/#createview)
+
+- Go to fscohort/views.py and add below lines
+
+```py
+from django.views.generic.edit import CreateView
 from django.urls import reverse_lazy
 
 class StudentCreateView(CreateView):
     model = Student
+
+    # If form_class is provided, that class will be used. Otherwise, a ModelForm will be instantiated.
     form_class = StudentForm
-    template_name = "fscohort/student_add.html" # default name app/modelname_form.html
+
+    # Default is fscohort/student_form.html.
+    template_name = "fscohort/student_add.html"
+
+    # This field is to redirect:
     success_url = reverse_lazy("list")
 ```
 
-go to fscohort/urls.py and amend lines
+- reverse_lazy() is, as the name implies, a lazy implementation of the reverse() URL resolver. Unlike the traditional reverse function, reverse_lazy() won't execute until the value is needed. It is useful because it prevent Reverse Not Found exceptions when working with URLs that may not be immediately known.
+
+- Difference:
+  - reverse() use in funcation & reverse_lazy() use in class.
+  - reverse() use in string & reverse_lazy() use in object
+
+- Go to fscohort/urls.py and amend lines
 
 ```python
 from django.urls import path
@@ -317,23 +351,53 @@ urlpatterns = [
 ]
 ```
 
-## UpdateView
+### (Optional) How to override a field
 
-go to fscohort/views.py and add below lines
+- As an example, let's try to change form save behaviour. We want to assign a default student number if there is no.
 
-```python
-from django.views.generic import UpdateView
-class StudentUpdateView(UpdateView):
-    model = Student
-    form_class = StudentForm
-    template_name = "fscohort/student_update.html" # default app/modelname_form.html
-    success_url = '/student_list/' #'reverse_lazy("list")
-    # pk_url_kwarg = 'id'
+- Dive deep into django.views.generic.edit.CreateView, find out form_valid function which is responsible to save the object if the form is valid, copy the function and add this code part:
+```py
+    def form_valid(self, form):
+        """If the form is valid, save the associated model."""
+        self.object = form.save()
+        ###########################
+        # Here is the code block we may add:
+        if not self.object.number:
+            self.object.number = 9999
+        self.object.save()
+        ###########################
+        return super().form_valid(form)   
 ```
 
-go to fscohort/urls.py and amend lines
+## UpdateView
 
-```python
+- A view that displays a form for editing an existing object, redisplaying the form with validation errors (if there are any) and saving changes to the object.
+
+- [UpdateView Documentation](https://docs.djangoproject.com/en/4.0/ref/class-based-views/generic-editing/#updateview)
+
+
+- Go to fscohort/views.py and add below lines
+
+```py
+from django.views.generic.edit import UpdateView
+
+class StudentUpdateView(UpdateView):
+    model = Student
+
+    # If form_class is provided, that class will be used. Otherwise, a ModelForm will be instantiated
+    form_class = StudentForm
+
+    # Default app/modelname_form.html
+    template_name = "fscohort/student_update.html"
+
+    success_url = '/student_list/'  # or alternative reverse_lazy("list")
+
+    # pk_url_kwarg = 'id'
+    # In this example, we decided to change the urls.py and use pk instead of id.
+```
+
+- Go to fscohort/urls.py and amend lines:
+```py
 from django.urls import path
 from .views import home,student_list, student_add, student_detail, student_update,student_delete
 # from django.views.generic import TemplateView
@@ -357,19 +421,27 @@ urlpatterns = [
 
 ## DeleteView
 
-go to fscohort/views.py and add below lines
+- A view that displays a confirmation page and deletes an existing object. The given object will only be deleted if the request method is POST.
 
-```python
-from django.views.generic import DeleteView
+- [DeleteView Documentation](https://docs.djangoproject.com/en/4.0/ref/class-based-views/generic-editing/#deleteview)
+
+
+- Go to fscohort/views.py and add below lines
+
+```py
+from django.views.generic.edit import DeleteView
+
 class StudentDeleteView(DeleteView):
     model = Student
-    template_name = 'fscohort/student_delete.html' # default app/modelname_confirm_delete.html
+
+    # default fscohort/student_confirm_delete.html
+    template_name = 'fscohort/student_delete.html'
+    
     success_url = reverse_lazy("list")
 ```
 
-go to fscohort/urls.py and amend lines
-
-```python
+- Go to fscohort/urls.py and amend lines
+```py
 from django.urls import path
 from .views import home,student_list, student_add, student_detail, student_update,student_delete
 # from django.views.generic import TemplateView
