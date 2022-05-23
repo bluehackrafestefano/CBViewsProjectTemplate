@@ -364,6 +364,8 @@ urlpatterns = [
         # Here is the code block we may add:
         if not self.object.number:
             self.object.number = 9999
+        if not self.object.image:
+            self.object.image = "default.png"
         self.object.save()
         ###########################
         return super().form_valid(form)   
